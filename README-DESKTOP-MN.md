@@ -18,7 +18,7 @@
 
 ## Энэ багцын төлөв
 
-Энэ нь desktop програм, браузерын өргөтгөлүүд болон Windows installer build-ийн **эх кодын багц**. Багц дотор бэлэн RAINY-Setup.exe хараахан байхгүй. Жинхэнэ Setup.exe-г Windows build амжилттай дууссаны дараа гаргана. Linux орчинд Windows build болсон мэт мэдээлэхгүй.
+Энэ нь desktop програм, браузерын өргөтгөлүүд болон Windows installer build-ийн **эх кодын багц**. Эх кодын хавтсанд Setup.exe орохгүй. Бэлэн installer-ийг GitHub Releases-ээс татна: https://github.com/ssboroo/Rainy-downloader/releases/tag/v2.0.0-build.5 . Windows build болон packaged GUI/native smoke шалгалт амжилттай дууссан.
 
 ## Бэлэн installer гарсны дараах хэрэглэгчийн урсгал
 

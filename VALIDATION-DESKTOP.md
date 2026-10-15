@@ -1,49 +1,33 @@
-# Desktop 2 шалгалт · 2026-10-15
+# Windows release шалгалт · 2026-10-15
 
-## Хийгдсэн
+## Амжилттай Windows build
 
-- Python suite: 35 тест; шинэ runtime source/frozen command, external binary lookup, per-browser manifests, desktop controller queue/settings/cancel, Chromium/Firefox helper outputs.
-- JavaScript suite: 8 тест; платформын video permalink, blob/feed ambiguity, inline payload validation, extension tab vs web content sender.
-- Өмнөх worker/process/protocol/queue regression тестүүд мөн ажилласан.
-- Python compile, JavaScript syntax болон manifest/archive бүтцийн шалгалт.
-- Official GitHub release metadata-г live шалгасан: yt-dlp.exe, Deno Windows ZIP, FFmpeg essentials ZIP нь одоогийн release дээр SHA256 digest-тай байв. Build script үүнийг татах бүрдээ дахин шалгана. Windows binary-уудыг энэ багцад татаж багцлаагүй.
+Release: v2.0.0-build.5. Code commit: 3c0f300a870b4df59e09cc32b6c6fe88b7ab9860.
 
-## Одоогоор хийгдээгүй
+Run: https://github.com/ssboroo/Rainy-downloader/actions/runs/38706831354
 
-- Windows PyInstaller, Inno Setup build; **RAINY-Setup.exe хараахан үүсээгүй**.
-- Packaged tools/native smoke test нь Windows workflow-д бичигдсэн боловч энд ажиллаагүй.
-- GUI-ийн бодит render/click-through болон Windows registry integration.
-- Chrome/Edge/Brave/Opera/Firefox-ийн бодит video button injection.
-- Сайт бүрийн бодит таталт, MP4/MP3 хөрвүүлэлт.
-- Firefox signing болон browser store publication.
+- Windows x64 runner, Python 3.12.
+- 39 Python болон 8 JavaScript тест амжилттай.
+- GUI болон console Native Messaging executable build амжилттай.
+- Upstream release SHA256-тай шалгасан yt-dlp/FFmpeg/ffprobe/Deno багцлагдсан.
+- Packaged tool version/health probes амжилттай.
+- yt-dlp binary дутуу үед health fail болж, давхар GUI spawn үлдээгээгүй.
+- Packaged Native Messaging roundtrip: PASS.
+- Packaged desktop window launch: PASS — жинхэнэ Windows процессоор GUI нээж, UIA-аар харагдах цонхыг илрүүлсэн.
+- Inno Setup installer build, artifact upload, public release publication амжилттай.
 
-CustomTkinter 5.2.2 суулгаж, desktop.app module import амжилттай шалгасан; screenshot-based QA гэж үзэхгүй. Бодит desktop release гаргахад Windows build амжилттай дуусах, installer smoke test болон video/browser checks нэмэгдэх ёстой.
+## Туршаагүй, хязгаар
 
-## Шийдвэрүүд
+- Installer-ийг хэрэглэгчийн Windows дээр суулгах/устгах бүрэн flow.
+- Браузер бүрийн бодит хаягийн мөрийг UIA-аар capture хийх болон floating control focus/menu lifecycle.
+- Бодит YouTube/Facebook/Instagram/X/TikTok болон бусад сайтын таталт, MP4/MP3 хөрвүүлэлт.
+- Firefox signing, Chrome/Edge store publication болон code-signing. Installer unsigned.
 
-- Системийн траффик interception хийхийн оронд optional browser helper + Native Messaging сонгосон. Браузер бүрд нэг удаагийн зөвшөөрөл шаардлагатай.
-- Windowed GUI EXE болон console Native EXE-г тусад нь build хийнэ. Native Messaging нь stdin/stdout binary handles шаарддаг тул windowed GUI exe-г шууд native host болгож болохгүй.
-- Download engine-ийн binary-уудыг Windows build үед upstream source-оос SHA256 verification-тэй авна. Энэ source ZIP нь setup executable-ийг орлохгүй.
-- Firefox хувилбар development helper бөгөөд signing хийгдээгүй. Chromium хөгжүүлэлтийн helper нь Load unpacked шаарддаг; чимээгүй browser policy суулгахгүй.
+Хөвөгч товч нь OS-level control; website injection эсвэл видео бүрийг илрүүлэх систем биш. Browser process whitelist нь Chrome, Edge, Brave, Opera, Firefox, Vivaldi. Хаягийн мөр танихгүй бол гараар холбоос оруулна. Document ancestry-тай webpage input-уудыг уншиж хаяг гэж авахгүй.
 
-## Independent review ба засвар
+## Шалтгаан ба засварын бүртгэл
 
-Тусдаа reviewer source, browser, build урсгалыг хянасан. Чухал дөрвөн finding-ийг зассан:
-- Frozen tool missing үед Python fallback хийж GUI spawn хийхгүй. Unit regression болон Windows CI-д renamed-tool health smoke test нэмсэн (Windows smoke хараахан ажиллаагүй).
-- Нэг card-д хоёр өөр video permalink байвал дурын нэгийг сонгохгүй.
-- Submission gate-ийг health/refresh completion суллахгүй.
-- SQLite startup/settings/snapshot ажлууд UI thread-ээс тусдаа task runner дээр хийгдэнэ. Held writer lock-той үед result drain блоклохгүйг тестээр шалгасан. Бодит Tk heartbeat Windows дээр туршаагүй.
-
-Нийт автомат тест: 43. Screenshot/UI, frozen exe, installer болон бодит browser/site шалгалтыг эдгээр тест орлохгүй.
-
-## Windows build логийн дагуух засвар
-
-Хэрэглэгчийн бодит Windows логт 1 failure, 11 error байсан. Шалтгаан: default cp1252 text I/O, SQLite context manager холболтыг хаадаггүйг тооцоогүй, Unicode child stdout, resolved Windows short/long path-ийн тест. Python 3.14 нь `py -3`-аар санамсаргүй сонгогдсон.
-
-Засварын regression: холболт context-оос гарсны дараа retained reference байсан ч хаагдсаныг болон exception үед хаагдсаныг нотолсон; cp1252 file I/O нөхцөлийг дуурайлган browser build шалгасан. cp1252 child stdout-той integration suite-г тусад нь алдаатайг эхэлж нотлоод засварын дараа 5/5 болгосон. Нийт suite 35 Python + 8 Node тест амжилттай. Тусдаа reviewer материаллаг алдаа олоогүй.
-
-Эдгээр нь Linux дээрх reproduction/regression шалгалтууд. Windows-ийн бүрэн build болон Setup.exe үүссэн гэж үзэхгүй; шинэ багцаар Windows build-ийг дахин ажиллуулах шаардлагатай.
-
-## Өргөтгөлгүй control
-
-Windows foreground browser process detection + explicit read-only UI Automation address capture нэмэгдсэн. Python URL/browser whitelist regression 2 тест амжилттай. Бодит foreground window, UIA болон floating GUI-г Windows хэрэглэгчийн session-д туршаагүй. Windows хөвөгч товч нь page injection болон бүх видеог автоматаар илрүүлэхтэй адил биш.
+- Хэрэглэгчийн Windows логийн UTF8/cp1252, SQLite WinError32, short/long canonical path, Python3.14 auto selection алдаануудыг зассан; бодит Windows suite дараа нь амжилттай болсон.
+- Frozen tools дутуу үед GUI fallback spawn хийх, ambiguous feed link, async submission gate болон UI-thread SQLite contention-ийн regression тестүүд орсон.
+- Анхны floating build нь unauthenticated GitHub API rate limit-д зогссон. Actions-ийн өөрийн token-ыг зөвхөн api.github.com metadata хүсэлтэд ашиглахаар зассан; дараагийн build амжилттай.
+- Тусдаа reviewer UIA field capture-ийн чухал алдааг олж, browser-native toolbar/control ID болон Document ancestry exclusion-оор зассан.
