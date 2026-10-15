@@ -95,3 +95,13 @@ class OutputQualityTests(unittest.TestCase):
    args=build_args({'url':'https://youtu.be/a','folder':'C:/x','quality':quality,'format':'mp4'},{'yt_dlp':['yt-dlp']})
    outputs.append(args[args.index('--output')+1])
   self.assertNotEqual(*outputs)
+
+class SilentVideoSelectionTests(unittest.TestCase):
+ def test_real_selector_accepts_video_without_audio(self):
+  try:from yt_dlp import YoutubeDL
+  except ImportError:self.skipTest('yt-dlp Python selector integration is not installed')
+  args=build_args({'url':'https://example.com/a','folder':'.','quality':720},{'yt_dlp':['yt-dlp']})
+  formats=[{'format_id':'silent','url':'https://example.com/a.mp4','ext':'mp4','vcodec':'h264','acodec':'none','height':720}]
+  with YoutubeDL({'quiet':True}) as y:
+   selected=list(y.build_format_selector(args[args.index('--format')+1])({'formats':formats,'has_merged_format':False,'incomplete_formats':False}))
+  self.assertEqual([f['format_id'] for f in selected],['silent'])

@@ -1,4 +1,4 @@
-﻿$ErrorActionPreference = 'Stop'
+$ErrorActionPreference = 'Stop'
 $env:PYTHONUTF8 = '1'
 $env:PYTHONIOENCODING = 'utf-8'
 if ($env:OS -ne 'Windows_NT') { throw 'Энэ build Windows дээр ажиллана.' }
@@ -14,7 +14,7 @@ try {
     $python = Join-Path $root '.build-venv\Scripts\python.exe'
     & $python -c "import sys; sys.exit(0 if sys.version_info[:2] == (3,12) else 1)"
     if ($LASTEXITCODE -ne 0) { throw 'Build Python 3.12 шаардлагатай. Python 3.12 суулгаад шинэ хавтсанд задалсан багцаас дахин ажиллуулна уу.' }
-    & $python -m pip install -r requirements-desktop.txt 'pyinstaller==6.16.0'
+    & $python -m pip install -r requirements-desktop.txt 'pyinstaller==6.16.0' yt-dlp
     Check-Native 'Build dependencies'
     & $python -m unittest discover -s tests -v
     Check-Native 'Python tests'

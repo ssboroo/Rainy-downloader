@@ -39,5 +39,5 @@ def build_args(job,tools):
         args[args.index('--output')+1]=f'%(title).150B [%(id)s] - {audio_quality}kbps.%(ext)s'
     if fmt=='mp3': args+=['--extract-audio','--audio-format','mp3','--audio-quality',str(audio_quality)+'K']
     else:
-        args+=['--format',f'bv[ext=mp4][vcodec^=avc1][height<=?{quality}]+ba[ext=m4a]/b[ext=mp4][height<=?{quality}]/bv*[height<=?{quality}]+ba/b[height<=?{quality}]','--merge-output-format','mp4','--recode-video','mp4']
+        args+=['--format',f'bv[ext=mp4][vcodec^=avc1][height<=?{quality}]+ba[ext=m4a]/b[ext=mp4][height<=?{quality}]/bv*[height<=?{quality}]+ba/b[height<=?{quality}]/bv[height<=?{quality}]','--merge-output-format','mp4','--recode-video','mp4']
     return args+['--',url]

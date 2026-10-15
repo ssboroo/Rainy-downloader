@@ -11,7 +11,7 @@ function attach(video){
  if(controls.has(video))return;
  const host=document.createElement('rainy-video-control');host.style.cssText='position:fixed;z-index:2147483646;pointer-events:auto;display:none';
  const shadow=host.attachShadow({mode:'closed'}),style=document.createElement('style');style.textContent=css;
- const button=document.createElement('button');button.className='download';button.type='button';button.textContent='↓ Татах';button.setAttribute('aria-label','RAINY програмаар энэ бичлэгийг татах');
+ const button=document.createElement('button');button.className='download';button.type='button';button.textContent='R · Татах';button.setAttribute('aria-label','RAINY програмаар энэ бичлэгийг татах');
  const panel=document.createElement('div');panel.className='panel';panel.hidden=true;
  const title=document.createElement('strong');title.textContent='RAINY · Бичлэг татах';
  const format=document.createElement('select');format.setAttribute('aria-label','Формат');for(const [v,t] of [['mp4','Видео · MP4'],['mp3','Аудио · MP3']]){const o=document.createElement('option');o.value=v;o.textContent=t;format.append(o);}
