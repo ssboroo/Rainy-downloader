@@ -2,9 +2,9 @@
 
 Монгол интерфэйстэй Windows видео/аудио татагч. Өргөтгөлгүй Windows хөвөгч товч болон нэмэлт браузерын helper-тэй.
 
-**[RAINY-Setup.exe татах · v2.0.0-build.5](https://github.com/ssboroo/Rainy-downloader/releases/download/v2.0.0-build.5/RAINY-Setup.exe)**
+**[RAINY-Setup.exe татах · хамгийн сүүлийн хувилбар](https://github.com/ssboroo/Rainy-downloader/releases/latest/download/RAINY-Setup.exe)**
 
-[Release](https://github.com/ssboroo/Rainy-downloader/releases/tag/v2.0.0-build.5) · [Амжилттай Windows build](https://github.com/ssboroo/Rainy-downloader/actions/runs/38706831354)
+[Release](https://github.com/ssboroo/Rainy-downloader/releases/latest) · [Амжилттай Windows build](https://github.com/ssboroo/Rainy-downloader/actions/runs/38711015492)
 
 ## Суулгах ба ашиглах
 
@@ -28,6 +28,6 @@
 
 ## Шалгасан хүрээ
 
-Windows CI: 39 Python + 8 Node tests, packaged dependency health, missing-tool failure, native host roundtrip, packaged GUI window launch, Inno Setup build амжилттай. Silent installer install/uninstall, браузер бүрийн бодит UIA, бодит сайтын видео таталт болон SmartScreen/code-signing шалгалт хийгдээгүй. Installer unsigned.
+Windows CI: 43 Python + 9 Node tests, packaged dependency health, missing-tool failure, native host roundtrip, packaged GUI window launch, Inno Setup build амжилттай. Silent installer install/uninstall, браузер бүрийн бодит UIA, бодит сайтын видео таталт болон SmartScreen/code-signing шалгалт хийгдээгүй. Installer unsigned.
 
 [Дэлгэрэнгүй заавар](README-DESKTOP-MN.md) · [Шалгалтын тайлан](VALIDATION-DESKTOP.md) · [Dependencies](THIRD-PARTY-NOTICES.md)
