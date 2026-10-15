@@ -48,6 +48,6 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          $tag = "v2.0.0-build.${{ github.run_number }}"
+          $tag = "v2.0.1-build.${{ github.run_number }}"
           gh release create $tag release/RAINY-Setup.exe --target "${{ github.sha }}" --title "RAINY Desktop $tag" --notes "Windows installer with extension-free floating browser download control. Built and smoke-tested on Windows. Browser UI Automation compatibility still requires an interactive user check. Unsigned installer."
           if ($LASTEXITCODE -ne 0) { throw "Release publication failed" }

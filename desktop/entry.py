@@ -17,6 +17,10 @@ def main():
     if '--health-report' in args:
         from host.runtime import health
         h=health();Path(args[args.index('--health-report')+1]).write_text(json.dumps(h),encoding='utf-8');sys.exit(0 if h['ready'] else 1)
+    import os
+    if os.name=='nt':
+        import ctypes
+        ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID('RAINY.Downloader.Desktop')
     from desktop.app import main as gui
     gui()
 if __name__=='__main__':

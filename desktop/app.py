@@ -15,10 +15,13 @@ class App(ctk.CTk):
     def __init__(self):
         super().__init__();ctk.set_appearance_mode('light');ctk.set_default_color_theme('blue')
         self.title('RAINY Татагч');self.geometry('1120x800');self.minsize(940,680);self.configure(fg_color=BG)
+        icon=ROOT/'browser-extensions'/'chromium'/'icons'/'rainy.ico'
+        if not icon.is_file():icon=ROOT/'extension'/'icons'/'rainy.ico'
+        if os.name=='nt' and icon.is_file():self.after(350,lambda:self.iconbitmap(str(icon)))
         self.controller=None;self.runner=TaskRunner();self.selected='download';self.last_jobs=None;self.forms={};self.poll_pending=False
         self.grid_columnconfigure(1,weight=1);self.grid_rowconfigure(0,weight=1)
         self.sidebar=ctk.CTkFrame(self,width=220,corner_radius=0,fg_color='white');self.sidebar.grid(row=0,column=0,sticky='nsew');self.sidebar.grid_propagate(False)
-        self.label(self.sidebar,'R ↓',38,BLUE,True).pack(anchor='w',padx=27,pady=(35,0))
+        self.label(self.sidebar,'R',38,BLUE,True).pack(anchor='w',padx=27,pady=(35,0))
         self.label(self.sidebar,'RAINY',23,INK,True).pack(anchor='w',padx=27)
         self.label(self.sidebar,'ТАТАГЧ · DESKTOP',10,MUTED,True).pack(anchor='w',padx=29,pady=(3,34))
         self.nav={}
