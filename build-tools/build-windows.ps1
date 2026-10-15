@@ -1,4 +1,4 @@
-$ErrorActionPreference = 'Stop'
+﻿$ErrorActionPreference = 'Stop'
 $env:PYTHONUTF8 = '1'
 $env:PYTHONIOENCODING = 'utf-8'
 if ($env:OS -ne 'Windows_NT') { throw 'Энэ build Windows дээр ажиллана.' }
