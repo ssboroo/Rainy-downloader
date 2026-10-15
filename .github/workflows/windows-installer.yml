@@ -40,6 +40,7 @@ jobs:
             release/RAINY-Setup.exe
             dist/RAINY/tools/versions.json
             dist/health-report.json
+            dist/RAINY-Interface.png
           if-no-files-found: error
 
       - name: Publish installer release
@@ -48,6 +49,6 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          $tag = "v2.1.0-build.${{ github.run_number }}"
-          gh release create $tag release/RAINY-Setup.exe --target "${{ github.sha }}" --title "RAINY Desktop $tag" --notes "Windows installer with extension-free floating browser download control. Built and smoke-tested on Windows. Browser UI Automation compatibility still requires an interactive user check. Unsigned installer."
+          $tag = "v2.2.0-build.${{ github.run_number }}"
+          gh release create $tag release/RAINY-Setup.exe dist/RAINY-Interface.png --target "${{ github.sha }}" --title "RAINY Desktop $tag" --notes "Windows installer with extension-free floating browser download control. Built and smoke-tested on Windows. Browser UI Automation compatibility still requires an interactive user check. Unsigned installer."
           if ($LASTEXITCODE -ne 0) { throw "Release publication failed" }

@@ -9,6 +9,7 @@ try:
     window.wait('exists visible',timeout=20)
     time.sleep(2)
     if p.poll() is not None:raise RuntimeError('Packaged GUI exited during startup')
+    window.capture_as_image().save(exe.parent.parent/'RAINY-Interface.png')
     print('Packaged desktop window launch: PASS')
 finally:
     if p.poll() is None:p.terminate()

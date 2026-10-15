@@ -8,7 +8,7 @@ from desktop.tasks import TaskRunner
 from host.storage import DEFAULTS
 from host.runtime import ROOT,health,ensure_worker
 from host.browser_install import register,status,CHROMIUM_ID
-BLUE='#2868F4';BG='#F4F7FC';INK='#192C4D';MUTED='#8797B1';BORDER='#E5ECF7'
+BLUE='#2563EB';BG='#F3F6FC';INK='#172B4D';MUTED='#63738D';BORDER='#E2E9F4'
 LABELS={'queued':'Хүлээж байна','downloading':'Татаж байна','processing':'Нэгтгэж байна','done':'Дууссан','error':'Алдаа','cancelled':'Цуцлагдсан','interrupted':'Тасарсан'}
 
 class App(ctk.CTk):
@@ -21,9 +21,10 @@ class App(ctk.CTk):
         self.controller=None;self.runner=TaskRunner();self.selected='download';self.last_jobs=None;self.forms={};self.poll_pending=False;self.float_enabled=False
         self.grid_columnconfigure(1,weight=1);self.grid_rowconfigure(0,weight=1)
         self.sidebar=ctk.CTkFrame(self,width=220,corner_radius=0,fg_color='white');self.sidebar.grid(row=0,column=0,sticky='nsew');self.sidebar.grid_propagate(False)
-        self.label(self.sidebar,'R',38,BLUE,True).pack(anchor='w',padx=27,pady=(35,0))
+        logo=ctk.CTkFrame(self.sidebar,width=54,height=54,corner_radius=17,fg_color=BLUE);logo.pack(anchor='w',padx=27,pady=(30,14));logo.pack_propagate(False)
+        self.label(logo,'R',32,'white',True).pack(expand=True)
         self.label(self.sidebar,'RAINY',23,INK,True).pack(anchor='w',padx=27)
-        self.label(self.sidebar,'ТАТАГЧ · DESKTOP',10,MUTED,True).pack(anchor='w',padx=29,pady=(3,34))
+        self.label(self.sidebar,'ТАНЫ ТАТАЛТЫН СТУДИ',10,MUTED,True).pack(anchor='w',padx=29,pady=(3,34))
         self.nav={}
         for key,text in [('download','↓   Шинэ таталт'),('queue','☷   Таталтууд'),('browsers','↗   Браузерын холболт'),('settings','⚙   Тохиргоо')]:
             b=ctk.CTkButton(self.sidebar,text=text,anchor='w',height=45,corner_radius=12,font=('Segoe UI',13),fg_color='white',text_color=MUTED,hover_color='#EEF4FF',command=lambda k=key:self.show(k));b.pack(fill='x',padx=17,pady=5);self.nav[key]=b
@@ -31,7 +32,7 @@ class App(ctk.CTk):
         self.label(self.sidebar,'ТАНЫ ТӨХӨӨРӨМЖИД\nШУУД ХАДГАЛНА.',10,MUTED).pack(side='bottom',padx=27,pady=30,anchor='w')
         self.shell=ctk.CTkFrame(self,fg_color='transparent');self.shell.grid(row=0,column=1,sticky='nsew',padx=33,pady=27);self.shell.grid_columnconfigure(0,weight=1);self.shell.grid_rowconfigure(2,weight=1)
         head=ctk.CTkFrame(self.shell,fg_color='transparent');head.grid(row=0,column=0,sticky='ew');head.grid_columnconfigure(0,weight=1)
-        self.label(head,'Таны жижиг таталтын студи',12,MUTED).grid(row=0,column=0,sticky='w')
+        self.label(head,'RAINY  /  Таталтын студи',12,MUTED).grid(row=0,column=0,sticky='w')
         self.health_label=self.label(head,'● Шалгаж байна…',11,MUTED);self.health_label.grid(row=0,column=1,sticky='e')
         self.notice=ctk.CTkLabel(self.shell,text='',text_color=BLUE,font=('Segoe UI',12),wraplength=750,justify='left',anchor='w');self.notice.grid(row=1,column=0,sticky='ew',pady=(8,10))
         self.error_copy=ctk.CTkButton(self.shell,text='Алдааг хуулах',width=110,height=28,fg_color='#FFF0ED',text_color='#B76D6D',command=self.copy_notice_error)
@@ -78,34 +79,48 @@ class App(ctk.CTk):
             elif callback:
                 try:callback(value)
                 except Exception as exc:self.runner.finish_submission();self.say(str(exc),True)
-        self.runner.drain(deliver);self.after(80,self.drain)
+        self.runner.drain(deliver)
+        busy=self.runner.submission_active
+        self.download_button.configure(state='disabled' if busy else 'normal')
+        if busy:self.download_button.configure(text='Бэлтгэж байна…')
+        elif self.download_button.cget('text')=='Бэлтгэж байна…':self.format_changed()
+        self.after(80,self.drain)
     def on_health(self,h):self.health_label.configure(text='● '+h['message'],text_color='#2C9F80' if h['ready'] else '#BA7754')
     def build_download(self):
-        p=self.pages['download'];self.heading(p,'Таалагдсан уу? Татаад ав.','Холбоосоо оруул. Чанараа сонго. Үлдсэнийг RAINY хийе.')
+        p=self.pages['download'];self.heading(p,'Хүссэн бичлэгээ хадгал.','01  Холбоос оруулах     →     02  Чанар сонгох     →     03  Татах')
         card=self.card(p);card.grid(row=2,column=0,sticky='ew',pady=(0,16));card.grid_columnconfigure(0,weight=1)
         self.label(card,'БИЧЛЭГИЙН ХОЛБООС',11,MUTED,True).grid(row=0,column=0,sticky='w',padx=24,pady=(23,10))
         line=ctk.CTkFrame(card,fg_color='transparent');line.grid(row=1,column=0,sticky='ew',padx=24);line.grid_columnconfigure(0,weight=1)
         self.url=ctk.CTkEntry(line,placeholder_text='https://…',height=48,corner_radius=11,border_color=BORDER,fg_color='#F8FAFF',font=('Segoe UI',14));self.url.grid(row=0,column=0,sticky='ew',padx=(0,8))
-        ctk.CTkButton(line,text='Хуулах сангаас',width=135,height=48,fg_color='#EAF1FF',text_color=BLUE,hover_color='#DEE9FF',command=self.paste).grid(row=0,column=1)
+        ctk.CTkButton(line,text='Холбоос буулгах',width=135,height=48,fg_color='#EAF1FF',text_color=BLUE,hover_color='#DEE9FF',command=self.paste).grid(row=0,column=1)
         self.label(card,'YouTube    Facebook    Instagram    X    TikTok    + бусад',11,MUTED).grid(row=2,column=0,sticky='w',padx=26,pady=(10,22))
         fields=ctk.CTkFrame(card,fg_color='transparent');fields.grid(row=3,column=0,sticky='ew',padx=24);fields.grid_columnconfigure((0,1),weight=1)
         settings=DEFAULTS;self.format=ctk.StringVar(value=settings['format']);self.quality=ctk.StringVar(value=str(settings['quality'])+'p');self.audio_quality=ctk.StringVar(value=str(settings['audio_quality'])+' kbps')
-        self.label(fields,'Формат',11,MUTED).grid(row=0,column=0,sticky='w',pady=(0,8));self.label(fields,'Дээд чанар',11,MUTED).grid(row=0,column=1,sticky='w',padx=8,pady=(0,8))
+        self.label(fields,'Формат',11,MUTED).grid(row=0,column=0,sticky='w',pady=(0,8));self.quality_label=self.label(fields,'Видеоны дээд чанар',11,MUTED);self.quality_label.grid(row=0,column=1,sticky='w',padx=8,pady=(0,8))
         ctk.CTkSegmentedButton(fields,values=['mp4','mp3'],variable=self.format,command=self.format_changed,height=40,selected_color=BLUE,font=('Segoe UI',13)).grid(row=1,column=0,sticky='ew',padx=(0,8))
         self.video_quality_menu=ctk.CTkOptionMenu(fields,values=['360p','480p','720p','1080p','1440p','2160p'],variable=self.quality,fg_color='#EAF1FF',button_color='#DCE8FF',button_hover_color='#C8DCFF',text_color=BLUE,height=40)
         self.video_quality_menu.grid(row=1,column=1,sticky='ew',padx=(8,0))
         self.audio_quality_menu=ctk.CTkOptionMenu(fields,values=['128 kbps','192 kbps','256 kbps','320 kbps'],variable=self.audio_quality,fg_color='#EAF1FF',button_color='#DCE8FF',text_color=BLUE,height=40)
         self.info_label=self.label(card,'',12,INK,wraplength=680);self.info_label.grid(row=4,column=0,sticky='w',padx=24,pady=(14,2))
-        ctk.CTkButton(card,text='↓   Шалгаж татах',height=49,corner_radius=11,fg_color=BLUE,font=('Segoe UI',15,'bold'),command=self.download_url).grid(row=5,column=0,sticky='ew',padx=24,pady=(8,12))
-        self.label(card,'Эх сурвалжийн чанараас хамаарна. MP3 битрейт тусдаа сонгоно.',10,MUTED).grid(row=6,column=0,pady=(0,20))
+        self.download_button=ctk.CTkButton(card,text='↓   Бичлэг татах',height=52,corner_radius=13,fg_color=BLUE,hover_color='#1D4ED8',font=('Segoe UI',15,'bold'),command=self.download_url)
+        self.download_button.grid(row=5,column=0,sticky='ew',padx=24,pady=(8,12))
+        self.url.bind('<Return>',lambda event:self.download_url())
+        self.format_hint=self.label(card,'MP4 · Видео ба дууг нэг файл болгон хадгална.',11,MUTED,wraplength=570);self.format_hint.grid(row=6,column=0,sticky='w',padx=24,pady=(0,20))
         batch=self.card(p);batch.grid(row=3,column=0,sticky='ew');batch.grid_columnconfigure(0,weight=1)
-        self.label(batch,'Олон холбоос · автоматаар дараалан татах',13,INK,True).grid(row=0,column=0,sticky='w',padx=22,pady=(20,9))
-        self.batch=ctk.CTkTextbox(batch,height=100,corner_radius=10,border_width=1,border_color=BORDER,fg_color='#F8FAFF');self.batch.grid(row=1,column=0,sticky='ew',padx=22)
-        ctk.CTkButton(batch,text='Дараалалд нэмэх',height=36,fg_color='#EAF1FF',text_color=BLUE,hover_color='#DEE9FF',command=self.download_batch).grid(row=2,column=0,sticky='e',padx=22,pady=16)
+        self.label(batch,'Багцаар татах',13,INK,True).grid(row=0,column=0,sticky='w',padx=22,pady=(20,9))
+        self.label(batch,'Нэг мөрөнд нэг холбоос · 100 хүртэл бичлэг',11,MUTED).grid(row=1,column=0,sticky='w',padx=22,pady=(0,10))
+        self.batch=ctk.CTkTextbox(batch,height=88,corner_radius=10,border_width=1,border_color=BORDER,fg_color='#F8FAFF');self.batch.grid(row=2,column=0,sticky='ew',padx=22)
+        ctk.CTkButton(batch,text='Дараалалд нэмэх',height=36,fg_color='#EAF1FF',text_color=BLUE,hover_color='#DEE9FF',command=self.download_batch).grid(row=3,column=0,sticky='e',padx=22,pady=16)
     def format_changed(self,value=None):
         if self.format.get()=='mp3':
+            self.quality_label.configure(text='Дууны битрейт')
+            self.format_hint.configure(text='MP3 · 192 kbps — өдөр тутам; 320 kbps — өндөр битрейт. Эх дууны чанараас хамаарна.')
+            self.download_button.configure(text='↓   MP3 дуу татах')
             self.video_quality_menu.grid_remove();self.audio_quality_menu.grid(row=1,column=1,sticky='ew',padx=(8,0))
         else:
+            self.quality_label.configure(text='Видеоны дээд чанар')
+            self.format_hint.configure(text='MP4 · Видео ба дууг нэг файл болгон хадгална. Эх сурвалжийн чанараас хамаарна.')
+            self.download_button.configure(text='↓   Бичлэг татах')
             self.audio_quality_menu.grid_remove();self.video_quality_menu.grid(row=1,column=1,sticky='ew',padx=(8,0))
     def paste(self):
         try:self.url.delete(0,'end');self.url.insert(0,self.clipboard_get().strip())
@@ -162,7 +177,7 @@ class App(ctk.CTk):
         count,errors=result;self.added(count)
         if errors:self.say(f'{count} нэмэгдлээ. {len(errors)} холбоос нэмэгдсэнгүй: {errors[0]}',True)
     def build_queue(self):
-        p=self.pages['queue'];self.heading(p,'Таны таталтууд','Цонхоо хаасан ч таталтын worker ажлаа үргэлжлүүлнэ.')
+        p=self.pages['queue'];self.heading(p,'Таны таталтууд','Таталтын явц нэг дор. Цонхыг хураасан ч таталт үргэлжилнэ.')
         self.stats=self.label(p,'',12,MUTED);self.stats.grid(row=2,column=0,sticky='w',pady=(0,15))
         self.jobs_frame=ctk.CTkFrame(p,fg_color='transparent');self.jobs_frame.grid(row=3,column=0,sticky='ew');self.jobs_frame.grid_columnconfigure(0,weight=1)
     def poll(self):
@@ -187,7 +202,7 @@ class App(ctk.CTk):
             if j['format']=='mp3':details+=f" · {j.get('audio_quality',192)} kbps"
             if j.get('speed'):details+=f" · {j['speed']/1048576:.1f} MB/с"
             if j.get('eta'):details+=f" · {int(j['eta'])} сек"
-            self.label(card,details,11,MUTED).grid(row=2,column=0,sticky='w',padx=20,pady=(9,16))
+            self.label(card,details,11,'#188461' if j['status']=='done' else '#B45345' if j['status']=='error' else MUTED).grid(row=2,column=0,sticky='w',padx=20,pady=(9,16))
             if j['status'] in ('queued','downloading','processing'):text='Цуцлах';fn=lambda id=j['id']:self.async_call(lambda:self.controller.cancel(id))
             elif j['status']=='done':text='Хавтас нээх';fn=lambda id=j['id']:self.async_call(lambda:self.controller.open_folder(id))
             else:text='Дахин татах';fn=lambda job=j:self.async_call(lambda:self.controller.enqueue(job['url'],job['title'],folder=job['folder'],quality=job['quality'],format=job['format'],audio_quality=job.get('audio_quality',192)))

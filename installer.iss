@@ -1,5 +1,5 @@
-﻿#define AppName "RAINY Татагч"
-#define AppVersion "2.1.0"
+#define AppName "RAINY Татагч"
+#define AppVersion "2.2.0"
 [Setup]
 AppId={{BAAAB15C-C0EA-4792-896A-808943FB0519}
 AppName={#AppName}
