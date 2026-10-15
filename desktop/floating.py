@@ -16,7 +16,7 @@ class FloatingControl:
     def open_app(self):self.app.deiconify();self.app.lift()
     def poll(self):
         try:
-            browser=foreground_browser()
+            browser=foreground_browser() if self.app.float_enabled else None
             if browser:
                 self.last_browser=browser
                 x=max(5,self.app.winfo_screenwidth()-180)

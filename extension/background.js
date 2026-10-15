@@ -6,7 +6,7 @@ function native(message,respond,transform=v=>v){
 chrome.runtime.onMessage.addListener((message,sender,respond)=>{
  if(sender.id!==chrome.runtime.id)return false;
  if(isContentSender(sender,chrome.runtime.getURL(''))){
-  if(message?.action==='inline-defaults'){native({action:'snapshot',payload:{}},respond,data=>({format:data.settings.format,quality:data.settings.quality}));return true;}
+  if(message?.action==='inline-defaults'){native({action:'snapshot',payload:{}},respond,data=>({format:data.settings.format,quality:data.settings.quality,audio_quality:data.settings.audio_quality}));return true;}
   if(message?.action!=='inline-enqueue'){respond({ok:false,error:'Зөвшөөрөгдөөгүй үйлдэл.'});return false;}
   try{
    const payload=inlinePayload(message.payload||{});

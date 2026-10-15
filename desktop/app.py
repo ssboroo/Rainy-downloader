@@ -18,7 +18,7 @@ class App(ctk.CTk):
         icon=ROOT/'browser-extensions'/'chromium'/'icons'/'rainy.ico'
         if not icon.is_file():icon=ROOT/'extension'/'icons'/'rainy.ico'
         if os.name=='nt' and icon.is_file():self.after(350,lambda:self.iconbitmap(str(icon)))
-        self.controller=None;self.runner=TaskRunner();self.selected='download';self.last_jobs=None;self.forms={};self.poll_pending=False
+        self.controller=None;self.runner=TaskRunner();self.selected='download';self.last_jobs=None;self.forms={};self.poll_pending=False;self.float_enabled=False
         self.grid_columnconfigure(1,weight=1);self.grid_rowconfigure(0,weight=1)
         self.sidebar=ctk.CTkFrame(self,width=220,corner_radius=0,fg_color='white');self.sidebar.grid(row=0,column=0,sticky='nsew');self.sidebar.grid_propagate(False)
         self.label(self.sidebar,'R',38,BLUE,True).pack(anchor='w',padx=27,pady=(35,0))
@@ -27,12 +27,15 @@ class App(ctk.CTk):
         self.nav={}
         for key,text in [('download','↓   Шинэ таталт'),('queue','☷   Таталтууд'),('browsers','↗   Браузерын холболт'),('settings','⚙   Тохиргоо')]:
             b=ctk.CTkButton(self.sidebar,text=text,anchor='w',height=45,corner_radius=12,font=('Segoe UI',13),fg_color='white',text_color=MUTED,hover_color='#EEF4FF',command=lambda k=key:self.show(k));b.pack(fill='x',padx=17,pady=5);self.nav[key]=b
+        ctk.CTkButton(self.sidebar,text='Бүрэн гарах',height=32,fg_color='white',text_color=MUTED,hover_color='#EEF4FF',command=self.destroy).pack(side='bottom',padx=20,pady=(0,15),fill='x')
         self.label(self.sidebar,'ТАНЫ ТӨХӨӨРӨМЖИД\nШУУД ХАДГАЛНА.',10,MUTED).pack(side='bottom',padx=27,pady=30,anchor='w')
         self.shell=ctk.CTkFrame(self,fg_color='transparent');self.shell.grid(row=0,column=1,sticky='nsew',padx=33,pady=27);self.shell.grid_columnconfigure(0,weight=1);self.shell.grid_rowconfigure(2,weight=1)
         head=ctk.CTkFrame(self.shell,fg_color='transparent');head.grid(row=0,column=0,sticky='ew');head.grid_columnconfigure(0,weight=1)
         self.label(head,'Таны жижиг таталтын студи',12,MUTED).grid(row=0,column=0,sticky='w')
         self.health_label=self.label(head,'● Шалгаж байна…',11,MUTED);self.health_label.grid(row=0,column=1,sticky='e')
         self.notice=ctk.CTkLabel(self.shell,text='',text_color=BLUE,font=('Segoe UI',12),wraplength=750,justify='left',anchor='w');self.notice.grid(row=1,column=0,sticky='ew',pady=(8,10))
+        self.error_copy=ctk.CTkButton(self.shell,text='Алдааг хуулах',width=110,height=28,fg_color='#FFF0ED',text_color='#B76D6D',command=self.copy_notice_error)
+        self.error_copy.grid(row=1,column=0,sticky='e');self.error_copy.grid_remove()
         self.body=ctk.CTkScrollableFrame(self.shell,fg_color='transparent');self.body.grid(row=2,column=0,sticky='nsew');self.body.grid_columnconfigure(0,weight=1)
         self.pages={}
         for name in self.nav:
@@ -47,7 +50,7 @@ class App(ctk.CTk):
         if os.name=='nt':
             from desktop.floating import FloatingControl
             self.floating=FloatingControl(self)
-            self.protocol('WM_DELETE_WINDOW',self.withdraw)
+            self.protocol('WM_DELETE_WINDOW',self.iconify)
     def label(self,parent,text,size=13,color=INK,bold=False,**kw):return ctk.CTkLabel(parent,text=text,font=('Segoe UI',size,'bold' if bold else 'normal'),text_color=color,justify='left',**kw)
     def card(self,parent):return ctk.CTkFrame(parent,fg_color='white',corner_radius=18,border_width=1,border_color=BORDER)
     def heading(self,page,title,sub):
@@ -58,12 +61,17 @@ class App(ctk.CTk):
         self.pages[key].grid(row=0,column=0,sticky='nsew')
         if key=='queue':self.last_jobs=None
         if key=='browsers':self.refresh_browsers()
-    def say(self,text,error=False):self.notice.configure(text=str(text),text_color='#B65858' if error else BLUE)
+    def say(self,text,error=False):
+        self.notice.configure(text=str(text),text_color='#B65858' if error else BLUE,wraplength=590 if error else 750)
+        if error:self.error_copy.grid()
+        else:self.error_copy.grid_remove()
+    def copy_notice_error(self):
+        self.clipboard_clear();self.clipboard_append('URL: '+self.url.get()+'\n'+self.notice.cget('text'))
     def async_call(self,fn,callback=None,submission=False,on_error=None):
         self.runner.submit(fn,callback,submission,on_error)
     def initialized(self,result):
         self.controller,snap,h=result
-        settings=snap['settings'];self.format.set(settings['format']);self.quality.set(str(settings['quality'])+'p');self.folder.set(settings['folder']);self.on_health(h);self.on_snapshot(snap)
+        settings=snap['settings'];self.format.set(settings['format']);self.quality.set(str(settings['quality'])+'p');self.folder.set(settings['folder']);self.audio_quality.set(str(settings['audio_quality'])+' kbps');self.float_var.set(settings['showFloating']);self.on_health(h);self.format_changed();self.on_snapshot(snap)
     def drain(self):
         def deliver(callback,value,error):
             if error:self.say(error,True)
@@ -81,24 +89,31 @@ class App(ctk.CTk):
         ctk.CTkButton(line,text='Хуулах сангаас',width=135,height=48,fg_color='#EAF1FF',text_color=BLUE,hover_color='#DEE9FF',command=self.paste).grid(row=0,column=1)
         self.label(card,'YouTube    Facebook    Instagram    X    TikTok    + бусад',11,MUTED).grid(row=2,column=0,sticky='w',padx=26,pady=(10,22))
         fields=ctk.CTkFrame(card,fg_color='transparent');fields.grid(row=3,column=0,sticky='ew',padx=24);fields.grid_columnconfigure((0,1),weight=1)
-        settings=DEFAULTS;self.format=ctk.StringVar(value=settings['format']);self.quality=ctk.StringVar(value=str(settings['quality'])+'p')
+        settings=DEFAULTS;self.format=ctk.StringVar(value=settings['format']);self.quality=ctk.StringVar(value=str(settings['quality'])+'p');self.audio_quality=ctk.StringVar(value=str(settings['audio_quality'])+' kbps')
         self.label(fields,'Формат',11,MUTED).grid(row=0,column=0,sticky='w',pady=(0,8));self.label(fields,'Дээд чанар',11,MUTED).grid(row=0,column=1,sticky='w',padx=8,pady=(0,8))
-        ctk.CTkSegmentedButton(fields,values=['mp4','mp3'],variable=self.format,height=40,selected_color=BLUE,font=('Segoe UI',13)).grid(row=1,column=0,sticky='ew',padx=(0,8))
-        ctk.CTkOptionMenu(fields,values=['360p','480p','720p','1080p','1440p','2160p'],variable=self.quality,fg_color='#EAF1FF',button_color='#DCE8FF',button_hover_color='#C8DCFF',text_color=BLUE,height=40).grid(row=1,column=1,sticky='ew',padx=(8,0))
+        ctk.CTkSegmentedButton(fields,values=['mp4','mp3'],variable=self.format,command=self.format_changed,height=40,selected_color=BLUE,font=('Segoe UI',13)).grid(row=1,column=0,sticky='ew',padx=(0,8))
+        self.video_quality_menu=ctk.CTkOptionMenu(fields,values=['360p','480p','720p','1080p','1440p','2160p'],variable=self.quality,fg_color='#EAF1FF',button_color='#DCE8FF',button_hover_color='#C8DCFF',text_color=BLUE,height=40)
+        self.video_quality_menu.grid(row=1,column=1,sticky='ew',padx=(8,0))
+        self.audio_quality_menu=ctk.CTkOptionMenu(fields,values=['128 kbps','192 kbps','256 kbps','320 kbps'],variable=self.audio_quality,fg_color='#EAF1FF',button_color='#DCE8FF',text_color=BLUE,height=40)
         self.info_label=self.label(card,'',12,INK,wraplength=680);self.info_label.grid(row=4,column=0,sticky='w',padx=24,pady=(14,2))
         ctk.CTkButton(card,text='↓   Шалгаж татах',height=49,corner_radius=11,fg_color=BLUE,font=('Segoe UI',15,'bold'),command=self.download_url).grid(row=5,column=0,sticky='ew',padx=24,pady=(8,12))
-        self.label(card,'Эх видеод байгаа чанараас сонгоно. MP3: 192 kbps.',10,MUTED).grid(row=6,column=0,pady=(0,20))
+        self.label(card,'Эх сурвалжийн чанараас хамаарна. MP3 битрейт тусдаа сонгоно.',10,MUTED).grid(row=6,column=0,pady=(0,20))
         batch=self.card(p);batch.grid(row=3,column=0,sticky='ew');batch.grid_columnconfigure(0,weight=1)
         self.label(batch,'Олон холбоос · автоматаар дараалан татах',13,INK,True).grid(row=0,column=0,sticky='w',padx=22,pady=(20,9))
         self.batch=ctk.CTkTextbox(batch,height=100,corner_radius=10,border_width=1,border_color=BORDER,fg_color='#F8FAFF');self.batch.grid(row=1,column=0,sticky='ew',padx=22)
         ctk.CTkButton(batch,text='Дараалалд нэмэх',height=36,fg_color='#EAF1FF',text_color=BLUE,hover_color='#DEE9FF',command=self.download_batch).grid(row=2,column=0,sticky='e',padx=22,pady=16)
+    def format_changed(self,value=None):
+        if self.format.get()=='mp3':
+            self.video_quality_menu.grid_remove();self.audio_quality_menu.grid(row=1,column=1,sticky='ew',padx=(8,0))
+        else:
+            self.audio_quality_menu.grid_remove();self.video_quality_menu.grid(row=1,column=1,sticky='ew',padx=(8,0))
     def paste(self):
         try:self.url.delete(0,'end');self.url.insert(0,self.clipboard_get().strip())
         except Exception:self.say('Хуулах санд холбоос олдсонгүй.',True)
     def download_url(self):
         if self.controller is None:self.say('Програм бэлдэж байна. Түр хүлээнэ үү.');return
         if not self.runner.begin_submission():return
-        url=self.url.get().strip();settings={'format':self.format.get(),'quality':int(self.quality.get()[:-1])};self.say('Бичлэгийг шалгаж байна…')
+        url=self.url.get().strip();settings={'format':self.format.get(),'quality':int(self.quality.get()[:-1]),'audio_quality':int(self.audio_quality.get().split()[0])};self.say('Бичлэгийг шалгаж байна…')
         def run():
             self.controller.save_settings(settings)
             return url,self.controller.inspect(url),settings
@@ -132,7 +147,7 @@ class App(ctk.CTk):
         if self.runner.submission_active:return
         urls=[x.strip() for x in self.batch.get('1.0','end').splitlines() if x.strip()]
         if not 1<=len(urls)<=100:self.say('1–100 холбоос оруулна уу.',True);return
-        settings={'format':self.format.get(),'quality':int(self.quality.get()[:-1])};self.runner.begin_submission();self.say('Холбоосуудыг шалгаж дараалалд нэмж байна…')
+        settings={'format':self.format.get(),'quality':int(self.quality.get()[:-1]),'audio_quality':int(self.audio_quality.get().split()[0])};self.runner.begin_submission();self.say('Холбоосуудыг шалгаж дараалалд нэмж байна…')
         def run():
             count=0;errors=[]
             for url in dict.fromkeys(urls):
@@ -156,7 +171,7 @@ class App(ctk.CTk):
             self.async_call(self.controller.snapshot,self.on_snapshot,on_error=lambda e:setattr(self,'poll_pending',False))
         self.after(1200,self.poll)
     def on_snapshot(self,snap):
-        self.poll_pending=False
+        self.poll_pending=False;self.float_enabled=snap['settings'].get('showFloating',False)
         self.nav['queue'].configure(text=f"☷   Таталтууд   {snap['active_count']}")
         if self.selected=='queue' and snap['jobs']!=self.last_jobs:
             self.last_jobs=snap['jobs'];self.render_jobs(snap)
@@ -169,16 +184,21 @@ class App(ctk.CTk):
             self.label(card,j['title'][:110],13,INK,True,wraplength=610).grid(row=0,column=0,sticky='w',padx=20,pady=(17,10))
             pc=ctk.CTkProgressBar(card,height=6,progress_color='#31B68C' if j['status']=='done' else BLUE,fg_color='#EBF1FC');pc.grid(row=1,column=0,sticky='ew',padx=20);pc.set(min(1,max(0,(j['progress'] or 0)/100)))
             details=f"{LABELS.get(j['status'],j['status'])} · {j['format'].upper()} · {round(j['progress'] or 0)}%"
+            if j['format']=='mp3':details+=f" · {j.get('audio_quality',192)} kbps"
             if j.get('speed'):details+=f" · {j['speed']/1048576:.1f} MB/с"
             if j.get('eta'):details+=f" · {int(j['eta'])} сек"
             self.label(card,details,11,MUTED).grid(row=2,column=0,sticky='w',padx=20,pady=(9,16))
             if j['status'] in ('queued','downloading','processing'):text='Цуцлах';fn=lambda id=j['id']:self.async_call(lambda:self.controller.cancel(id))
             elif j['status']=='done':text='Хавтас нээх';fn=lambda id=j['id']:self.async_call(lambda:self.controller.open_folder(id))
-            else:text='Дахин татах';fn=lambda job=j:self.async_call(lambda:self.controller.enqueue(job['url'],job['title'],folder=job['folder'],quality=job['quality'],format=job['format']))
+            else:text='Дахин татах';fn=lambda job=j:self.async_call(lambda:self.controller.enqueue(job['url'],job['title'],folder=job['folder'],quality=job['quality'],format=job['format'],audio_quality=job.get('audio_quality',192)))
             ctk.CTkButton(card,text=text,width=105,height=29,fg_color='#EAF1FF',text_color=BLUE,hover_color='#DEE9FF',command=fn).grid(row=2,column=1,padx=(0,20))
-            if j['error']:self.label(card,j['error'][:500],10,'#B76D6D',wraplength=650).grid(row=3,column=0,columnspan=2,sticky='w',padx=20,pady=(0,14))
+            if j['error']:
+                self.label(card,j['error'][:500],10,'#B76D6D',wraplength=580).grid(row=3,column=0,sticky='w',padx=20,pady=(0,14))
+                ctk.CTkButton(card,text='Алдааг хуулах',width=105,height=28,fg_color='#FFF0ED',text_color='#B76D6D',command=lambda job=j:self.copy_error(job)).grid(row=3,column=1,padx=(0,20),pady=(0,14))
+    def copy_error(self,job):
+        self.clipboard_clear();self.clipboard_append(f"URL: {job['url']}\nФормат: {job['format']}\nАлдаа: {job['error']}");self.say('Алдааны мэдээлэл хуулагдлаа.')
     def build_browsers(self):
-        p=self.pages['browsers'];self.heading(p,'Браузерын холболт','Өргөтгөлгүй: браузерын хажуугийн RAINY хөвөгч товчийг дарна. Доорх helper нь нэмэлт сонголт.')
+        p=self.pages['browsers'];self.heading(p,'Браузерын холболт','Видео тоглож байгааг яг танихад helper хэрэгтэй. Өргөтгөлгүй хөвөгч товчийг тохиргооноос гараар асаана.')
         self.browser_rows=ctk.CTkFrame(p,fg_color='transparent');self.browser_rows.grid(row=2,column=0,sticky='ew');self.browser_rows.grid_columnconfigure(0,weight=1)
         ctk.CTkButton(p,text='Холболтыг бүртгэх / засах',height=43,command=lambda:self.async_call(lambda:register(ROOT),lambda r:(self.say('Native host бүртгэгдлээ. Өргөтгөлийг тусад нь зөвшөөрнө үү.'),self.refresh_browsers()))).grid(row=3,column=0,sticky='ew',pady=(18,10))
         ctk.CTkButton(p,text='Chromium өргөтгөлийн хавтас нээх',height=40,fg_color='#EAF1FF',text_color=BLUE,command=self.open_extension).grid(row=4,column=0,sticky='ew',pady=6)
@@ -202,14 +222,16 @@ class App(ctk.CTk):
         ctk.CTkEntry(card,textvariable=self.folder,height=42,border_color=BORDER).grid(row=1,column=0,sticky='ew',padx=23)
         ctk.CTkButton(card,text='Хавтас сонгох',height=33,fg_color='#EAF1FF',text_color=BLUE,command=self.choose_folder).grid(row=2,column=0,sticky='w',padx=23,pady=12)
         self.label(card,'Үндсэн формат, чанарыг «Шинэ таталт» хэсэгт сонгоно.\nБраузерын товч энэ тохиргоог ашиглана.',12,MUTED).grid(row=3,column=0,sticky='w',padx=23,pady=12)
-        ctk.CTkButton(card,text='Тохиргоо хадгалах',height=43,command=self.save_settings).grid(row=4,column=0,sticky='ew',padx=23,pady=(10,23))
+        self.float_var=ctk.BooleanVar(value=False)
+        ctk.CTkCheckBox(card,text='Өргөтгөлгүй хөвөгч товч (видео тоглолтыг танихгүй)',variable=self.float_var,font=('Segoe UI',12)).grid(row=4,column=0,sticky='w',padx=23,pady=12)
+        ctk.CTkButton(card,text='Тохиргоо хадгалах',height=43,command=self.save_settings).grid(row=5,column=0,sticky='ew',padx=23,pady=(10,23))
         self.label(p,'Сайтын нэвтрэх cookie-г автоматаар уншихгүй.\nТатсан файлыг RAINY сервер рүү дамжуулахгүй.\nПрограмыг хаахад таталтын worker ажиллаж үлдэж болно.',11,MUTED).grid(row=3,column=0,sticky='w',pady=24)
     def choose_folder(self):
         folder=filedialog.askdirectory(parent=self,title='Таталт хадгалах хавтас')
         if folder:self.folder.set(folder)
     def save_settings(self):
         if self.controller is None:self.say('Програм бэлдэж байна. Түр хүлээнэ үү.');return
-        settings={'folder':self.folder.get(),'format':self.format.get(),'quality':int(self.quality.get()[:-1])}
+        settings={'folder':self.folder.get(),'format':self.format.get(),'quality':int(self.quality.get()[:-1]),'audio_quality':int(self.audio_quality.get().split()[0]),'showFloating':self.float_var.get()}
         self.async_call(lambda:self.controller.save_settings(settings),lambda s:self.say('Тохиргоо хадгалагдлаа.'))
 
 def main():App().mainloop()

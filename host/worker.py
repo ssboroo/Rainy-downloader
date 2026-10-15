@@ -3,6 +3,7 @@ import json, os, sys, time, subprocess, threading, queue
 from pathlib import Path
 from host.storage import Store
 from host.core import build_args
+from host.errors import download_error
 from host.runtime import DATA, tools, subprocess_options, subprocess_environment
 
 def parse_progress(line):
@@ -72,7 +73,7 @@ def download(store,job):
         current=store.get(job['id'])
         if current['status']=='cancelled': return
         if code or not output or not Path(output).is_file():
-            raise ValueError('Таталт амжилтгүй. Холбоос, сүлжээ болон видеоны хандалтыг шалгана уу. '+(' '.join(errors)[:900]))
+            raise ValueError(download_error(job['url'],' '.join(errors)))
         store.update(job['id'],{'status':'done','progress':100,'output_path':output,'speed':None,'eta':None,'error':''})
     finally:
         stop_process(p)

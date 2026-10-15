@@ -44,3 +44,8 @@ test('ambiguous card links never select arbitrary first video',()=>{
  assert.equal(resolveVideoUrl({pageUrl:'https://www.youtube.com/',anchors:['https://www.youtube.com/watch?v=a','https://www.youtube.com/watch?v=b']}),null);
  assert.equal(resolveVideoUrl({pageUrl:'https://x.com/a/status/111',anchors:['https://x.com/b/status/222','https://x.com/a/status/111']}),null);
 });
+import {isPlayingVideo} from '../extension/video-source.js';
+test('download control only for actively playing video',()=>{
+ assert.equal(isPlayingVideo({paused:false,ended:false,readyState:3,currentTime:1,videoWidth:1920,videoHeight:1080}),true);
+ for(const diff of [{paused:true},{ended:true},{readyState:1},{currentTime:0},{videoWidth:0}])assert.equal(isPlayingVideo({paused:false,ended:false,readyState:3,currentTime:1,videoWidth:1920,videoHeight:1080,...diff}),false);
+});

@@ -14,7 +14,7 @@ class CoreTests(unittest.TestCase):
         self.assertIn('--progress',args)
         self.assertIn('C:/Монгол хавтас', args)
         self.assertEqual(args[-2:],['--','https://youtu.be/a'])
-        self.assertIn('height<=720', ' '.join(args))
+        self.assertIn('height<=?720', ' '.join(args))
     def test_audio(self):
         args=build_args({'url':'https://youtu.be/a','folder':'C:/x','quality':1080,'format':'mp3'}, {'yt_dlp':['python','-m','yt_dlp']})
         self.assertIn('--extract-audio',args)
@@ -67,3 +67,23 @@ class SnapshotSizeTests(unittest.TestCase):
             snap=s.snapshot()
             self.assertLess(len(json.dumps(snap,ensure_ascii=False).encode()),900000)
             self.assertGreater(snap['omitted'],0)
+
+class AudioQualityTests(unittest.TestCase):
+ def test_mp3_selected_bitrate(self):
+  for rate in [128,192,256,320]:
+   args=build_args({'url':'https://youtu.be/a','folder':'C:/x','format':'mp3','audio_quality':rate},{'yt_dlp':['yt-dlp']})
+   self.assertEqual(args[args.index('--audio-quality')+1],str(rate)+'K')
+ def test_audio_quality_is_saved_and_validated(self):
+  with tempfile.TemporaryDirectory() as d:
+   s=Store(Path(d)/'q.db');s.settings({'audio_quality':320,'showFloating':False})
+   j=s.enqueue({'url':'https://youtu.be/audio','folder':d,'format':'mp3'})
+   self.assertEqual(j['audio_quality'],320)
+   self.assertFalse(s.settings()['showFloating'])
+   with self.assertRaises(ValueError):s.settings({'audio_quality':999})
+
+class FacebookFormatTests(unittest.TestCase):
+ def test_unknown_height_formats_have_fallback(self):
+  args=build_args({'url':'https://www.facebook.com/reel/123','folder':'C:/x','format':'mp4'},{'yt_dlp':['yt-dlp']})
+  selector=args[args.index('--format')+1]
+  self.assertIn('height<=?1080',selector)
+  self.assertIn('--recode-video',args)

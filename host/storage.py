@@ -2,7 +2,7 @@
 import json, sqlite3, uuid, time
 from pathlib import Path
 from host.core import normalize_url
-DEFAULTS={'folder':str(Path.home()/'Downloads'/'RAINY'),'quality':1080,'format':'mp4','oneClick':False}
+DEFAULTS={'folder':str(Path.home()/'Downloads'/'RAINY'),'quality':1080,'format':'mp4','oneClick':False,'audio_quality':192,'showFloating':False}
 class ClosingConnection(sqlite3.Connection):
     def __exit__(self,exc_type,exc_value,traceback):
         try:return super().__exit__(exc_type,exc_value,traceback)
@@ -24,7 +24,7 @@ class Store:
             data={**DEFAULTS,**(json.loads(row[0]) if row else {})}
             if values is not None:
                 data.update({k:v for k,v in values.items() if k in DEFAULTS})
-                if data['quality'] not in (360,480,720,1080,1440,2160) or data['format'] not in ('mp3','mp4') or not isinstance(data['oneClick'],bool): raise ValueError('Тохиргооны сонголт буруу.')
+                if data['quality'] not in (360,480,720,1080,1440,2160) or data['format'] not in ('mp3','mp4') or not isinstance(data['oneClick'],bool) or not isinstance(data['showFloating'],bool) or data['audio_quality'] not in (128,192,256,320): raise ValueError('Тохиргооны сонголт буруу.')
                 if not isinstance(data['folder'],str) or len(data['folder'])>1024: raise ValueError('Хавтасны зам хэт урт байна.')
                 p=Path(data['folder']).expanduser()
                 if not p.is_absolute(): raise ValueError('Хадгалах хавтасны бүтэн замыг оруулна уу.')
@@ -43,7 +43,7 @@ class Store:
         return result
     def enqueue(self,job):
         data={**self.settings(),**job}; data['url']=normalize_url(data['url'])
-        if data['format'] not in ('mp3','mp4') or data['quality'] not in (360,480,720,1080,1440,2160): raise ValueError('Таталтын тохиргоо буруу.')
+        if data['format'] not in ('mp3','mp4') or data['quality'] not in (360,480,720,1080,1440,2160) or data['audio_quality'] not in (128,192,256,320): raise ValueError('Таталтын тохиргоо буруу.')
         if not isinstance(data['folder'],str) or len(data['folder'])>1024: raise ValueError('Хавтасны зам хэт урт байна.')
         folder=Path(data['folder']).expanduser()
         if not folder.is_absolute(): raise ValueError('Хавтасны бүтэн зам шаардлагатай.')
@@ -52,7 +52,7 @@ class Store:
             c.execute('BEGIN IMMEDIATE')
             jobs=[json.loads(r[0]) for r in c.execute('SELECT data FROM jobs')]
             if any(j['url']==data['url'] and j['status'] in ('queued','downloading','processing') for j in jobs): raise ValueError('Энэ бичлэг таталтын дараалалд байна.')
-            data={k:data[k] for k in ('url','folder','quality','format')}
+            data={k:data[k] for k in ('url','folder','quality','format','audio_quality')}
             data.update(id=uuid.uuid4().hex,title=str(job.get('title') or data['url'])[:300],status='queued',progress=0,speed=None,eta=None,error='',output_path='',created=time.time())
             c.execute('INSERT INTO jobs VALUES (?,?)',(data['id'],json.dumps(data)))
         return data

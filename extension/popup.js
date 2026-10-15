@@ -32,7 +32,7 @@ async function inspect(){
  const url=normalizeUrl($('url').value);
  const result=await request('inspect',{url});info=result;infoUrl=url;renderInfo(result);return result;
 }
-function selection(){return validateSettings({format:$('format').value,quality:Number($('quality').value),oneClick:snapshot?.settings.oneClick||false});}
+function selection(){return validateSettings({format:$('format').value,quality:Number($('quality').value),audio_quality:Number($('audio-quality').value),oneClick:snapshot?.settings.oneClick||false});}
 async function add(url,title){const s=selection();await request('settings',s);return request('enqueue',{url,title,...s});}
 async function download(){
  const url=normalizeUrl($('url').value);
@@ -49,7 +49,7 @@ async function download(){
 async function run(button,fn){if(busy)return;busy=true;button.disabled=true;const old=button.textContent;button.textContent='Түр хүлээнэ үү…';try{await fn();}catch(e){say(friendlyError(e.message),true);}finally{busy=false;button.disabled=false;button.textContent=old;}}
 $('inspect').onclick=()=>run($('inspect'),inspect);
 $('download').onclick=()=>run($('download'),download);
-$('format').onchange=()=>{$('quality').disabled=$('format').value==='mp3';$('download-hint').textContent=$('format').value==='mp3'?'Аудиог MP3 · 192 kbps болгон хөрвүүлнэ.':'MP4-т тохирох эх сурвалжийн боломжит чанараар татна.';};
+$('format').onchange=()=>{$('quality').hidden=$('format').value==='mp3';$('audio-quality').hidden=$('format').value!=='mp3';$('download-hint').textContent=$('format').value==='mp3'?'Сонгосон MP3 битрейтээр хөрвүүлнэ. Эх аудионы чанараас хамаарна.':'MP4-т тохирох эх сурвалжийн боломжит чанараар татна.';};
 $('batch-add').onclick=()=>run($('batch-add'),async()=>{
  const lines=$('batch').value.split(/\r?\n/).map(v=>v.trim()).filter(Boolean);
  if(!lines.length||lines.length>100)throw new Error('1–100 холбоос оруулна уу.');
@@ -71,7 +71,7 @@ function renderJobs(jobs){
   const b=document.createElement('button');b.className='text-btn';
   if(['queued','downloading','processing'].includes(j.status)){b.textContent='Цуцлах';b.onclick=()=>run(b,async()=>{await request('cancel',{id:j.id});await refresh();});}
   else if(j.status==='done'){b.textContent='Хавтас нээх ↗';b.onclick=()=>run(b,()=>request('open_folder',{id:j.id}));}
-  else{b.textContent='Дахин татах ↻';b.onclick=()=>run(b,async()=>{await request('enqueue',{url:j.url,title:j.title,folder:j.folder,format:j.format,quality:j.quality});await refresh();});}
+  else{b.textContent='Дахин татах ↻';b.onclick=()=>run(b,async()=>{await request('enqueue',{url:j.url,title:j.title,folder:j.folder,format:j.format,quality:j.quality,audio_quality:j.audio_quality??192});await refresh();});}
   foot.append(b);card.append(title,meta,track,foot);
   if(j.error){const e=document.createElement('div');e.className='job-error';e.textContent=j.error;card.append(e);}
   $('jobs').append(card);
@@ -83,7 +83,7 @@ async function init(){
  try{await current();}catch{}
  try{
   const h=await request('health');ready=h.ready;$('connection').textContent=h.ready?'● Татахад бэлэн':'● Туслах хэрэгсэл дутуу';$('connection').classList.toggle('ready',h.ready);$('setup').hidden=h.ready;
-  await refresh();$('format').value=snapshot.settings.format;$('quality').value=snapshot.settings.quality;$('format').onchange();
+  await refresh();$('format').value=snapshot.settings.format;$('quality').value=snapshot.settings.quality;$('audio-quality').value=snapshot.settings.audio_quality??192;$('format').onchange();
   if(!h.ready)say(h.message,true);
   if(h.ready&&snapshot.settings.oneClick&&$('url').value)await run($('download'),download);
  }catch(e){$('connection').textContent='● Суулгац шаардлагатай';$('setup').hidden=false;say(friendlyError(e.message),true);renderJobs([]);}

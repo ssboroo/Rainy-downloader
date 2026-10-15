@@ -5,6 +5,7 @@ from urllib.parse import urlsplit
 from host.protocol import read_frame, write_frame
 from host.storage import Store
 from host.core import normalize_url
+from host.errors import download_error
 from host.runtime import DATA, ROOT, health, ensure_worker, tools, subprocess_options
 
 def check_origin(origin,extension_id):
@@ -34,7 +35,7 @@ def inspect(url):
     try:
         p=subprocess.run(args,capture_output=True,text=True,encoding='utf-8',errors='replace',timeout=65,**subprocess_options())
     except subprocess.TimeoutExpired: raise ValueError('Холбоос шалгах хугацаа дууслаа. Дахин оролдоно уу.')
-    if p.returncode: raise ValueError('Бичлэгийн мэдээлэл авах боломжгүй. Нийтэд нээлттэй холбоос эсэхийг шалгана уу. '+p.stderr[-700:])
+    if p.returncode: raise ValueError(download_error(url,p.stderr[-900:]))
     return summarize_info(json.loads(p.stdout))
 
 def dispatch(action,payload,store):

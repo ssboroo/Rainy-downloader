@@ -6,7 +6,8 @@ export function normalizeUrl(value){
 }
 export function validateSettings(s){
  if(![360,480,720,1080,1440,2160].includes(Number(s.quality))||!['mp4','mp3'].includes(s.format))throw new Error('Тохиргоо буруу байна.');
- return {...s,quality:Number(s.quality),oneClick:!!s.oneClick};
+ const audio_quality=Number(s.audio_quality??192);if(![128,192,256,320].includes(audio_quality))throw new Error('MP3 чанар буруу.');
+ return {...s,quality:Number(s.quality),audio_quality,oneClick:!!s.oneClick};
 }
 export function progressText(n){return `${Number.isFinite(Number(n))?Math.min(100,Math.max(0,Math.round(Number(n)))):0}%`;}
 export function friendlyError(v){

@@ -31,7 +31,11 @@ def build_args(job,tools):
           '--output','%(title).150B [%(id)s].%(ext)s',
           '--progress-template','download:RAINY_PROGRESS:%(progress)j',
           '--print','after_move:RAINY_FILE:%(filepath)s']
-    if fmt=='mp3': args+=['--extract-audio','--audio-format','mp3','--audio-quality','192K']
+    audio_quality=int(job.get('audio_quality',192))
+    if audio_quality not in (128,192,256,320):raise ValueError('MP3 чанарын сонголт буруу.')
+    if fmt=='mp3':
+        args[args.index('--output')+1]=f'%(title).150B [%(id)s] - {audio_quality}kbps.%(ext)s'
+    if fmt=='mp3': args+=['--extract-audio','--audio-format','mp3','--audio-quality',str(audio_quality)+'K']
     else:
-        args+=['--format',f'bv[ext=mp4][vcodec^=avc1][height<={quality}]+ba[ext=m4a]/b[ext=mp4][height<={quality}]','--merge-output-format','mp4']
+        args+=['--format',f'bv[ext=mp4][vcodec^=avc1][height<=?{quality}]+ba[ext=m4a]/b[ext=mp4][height<=?{quality}]/bv*[height<=?{quality}]+ba/b[height<=?{quality}]','--merge-output-format','mp4','--recode-video','mp4']
     return args+['--',url]

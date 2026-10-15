@@ -23,6 +23,8 @@ export function resolveVideoUrl({pageUrl,anchors=[],mediaUrl='',videoCount=1}){
  try{return videoCount===1?normalizeUrl(pageUrl):null;}catch{return null;}
 }
 export function inlinePayload(p){
- const settings=validateSettings({format:p.format,quality:p.quality});
- return {url:normalizeUrl(p.url),format:settings.format,quality:settings.quality,title:String(p.title||'').slice(0,300)};
+ const settings=validateSettings({format:p.format,quality:p.quality,audio_quality:p.audio_quality});
+ return {url:normalizeUrl(p.url),format:settings.format,quality:settings.quality,audio_quality:settings.audio_quality,title:String(p.title||'').slice(0,300)};
 }
+
+export function isPlayingVideo(v){return !v.paused&&!v.ended&&v.readyState>=2&&v.currentTime>0&&v.videoWidth>0&&v.videoHeight>0;}
