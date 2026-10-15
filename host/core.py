@@ -33,6 +33,8 @@ def build_args(job,tools):
           '--print','after_move:RAINY_FILE:%(filepath)s']
     audio_quality=int(job.get('audio_quality',192))
     if audio_quality not in (128,192,256,320):raise ValueError('MP3 чанарын сонголт буруу.')
+    if fmt=='mp4':
+        args[args.index('--output')+1]=f'%(title).150B [%(id)s] - up-to-{quality}p.%(ext)s'
     if fmt=='mp3':
         args[args.index('--output')+1]=f'%(title).150B [%(id)s] - {audio_quality}kbps.%(ext)s'
     if fmt=='mp3': args+=['--extract-audio','--audio-format','mp3','--audio-quality',str(audio_quality)+'K']

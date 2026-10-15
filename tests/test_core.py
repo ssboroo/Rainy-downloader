@@ -87,3 +87,11 @@ class FacebookFormatTests(unittest.TestCase):
   selector=args[args.index('--format')+1]
   self.assertIn('height<=?1080',selector)
   self.assertIn('--recode-video',args)
+
+class OutputQualityTests(unittest.TestCase):
+ def test_video_quality_outputs_do_not_collide(self):
+  outputs=[]
+  for quality in [360,1080]:
+   args=build_args({'url':'https://youtu.be/a','folder':'C:/x','quality':quality,'format':'mp4'},{'yt_dlp':['yt-dlp']})
+   outputs.append(args[args.index('--output')+1])
+  self.assertNotEqual(*outputs)
