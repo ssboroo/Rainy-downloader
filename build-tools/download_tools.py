@@ -2,12 +2,18 @@
 from pathlib import Path
 from urllib.request import urlopen,Request
 from urllib.parse import urlsplit
-import fnmatch,hashlib,json,tempfile,zipfile,shutil,sys
+import fnmatch,hashlib,json,tempfile,zipfile,shutil,sys,os
 AGENT='RAINY-Windows-Build/2.0'
+
+def request_headers(url,token=None):
+    headers={'User-Agent':AGENT}
+    token=token if token is not None else os.environ.get('GH_TOKEN') or os.environ.get('GITHUB_TOKEN')
+    if token and urlsplit(url).hostname=='api.github.com':headers['Authorization']='Bearer '+token
+    return headers
 
 def read(url):
     if urlsplit(url).scheme!='https':raise ValueError('HTTPS required')
-    return urlopen(Request(url,headers={'User-Agent':AGENT}),timeout=90)
+    return urlopen(Request(url,headers=request_headers(url)),timeout=90)
 
 def asset(repo,pattern,out):
     with read('https://api.github.com/repos/'+repo+'/releases/latest') as r:release=json.load(r)

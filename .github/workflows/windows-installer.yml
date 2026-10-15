@@ -29,6 +29,8 @@ jobs:
         shell: pwsh
         run: choco install innosetup --yes --no-progress
       - name: Build and smoke test
+        env:
+          GH_TOKEN: ${{ github.token }}
         shell: powershell
         run: ./build-tools/build-windows.ps1
       - uses: actions/upload-artifact@v4
