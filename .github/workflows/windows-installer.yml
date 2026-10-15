@@ -12,7 +12,7 @@ on:
       - 'requirements-desktop.txt'
       - '.github/workflows/windows-installer.yml'
 permissions:
-  contents: read
+  contents: write
 jobs:
   windows:
     runs-on: windows-latest
@@ -39,3 +39,13 @@ jobs:
             dist/RAINY/tools/versions.json
             dist/health-report.json
           if-no-files-found: error
+
+      - name: Publish installer release
+        if: github.ref == 'refs/heads/main'
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $tag = "v2.0.0-build.${{ github.run_number }}"
+          gh release create $tag release/RAINY-Setup.exe --target "${{ github.sha }}" --title "RAINY Desktop $tag" --notes "Windows installer with extension-free floating browser download control. Built and smoke-tested on Windows. Browser UI Automation compatibility still requires an interactive user check. Unsigned installer."
+          if ($LASTEXITCODE -ne 0) { throw "Release publication failed" }
