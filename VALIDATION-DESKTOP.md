@@ -43,3 +43,7 @@ CustomTkinter 5.2.2 суулгаж, desktop.app module import амжилттай
 Засварын regression: холболт context-оос гарсны дараа retained reference байсан ч хаагдсаныг болон exception үед хаагдсаныг нотолсон; cp1252 file I/O нөхцөлийг дуурайлган browser build шалгасан. cp1252 child stdout-той integration suite-г тусад нь алдаатайг эхэлж нотлоод засварын дараа 5/5 болгосон. Нийт suite 35 Python + 8 Node тест амжилттай. Тусдаа reviewer материаллаг алдаа олоогүй.
 
 Эдгээр нь Linux дээрх reproduction/regression шалгалтууд. Windows-ийн бүрэн build болон Setup.exe үүссэн гэж үзэхгүй; шинэ багцаар Windows build-ийг дахин ажиллуулах шаардлагатай.
+
+## Өргөтгөлгүй control
+
+Windows foreground browser process detection + explicit read-only UI Automation address capture нэмэгдсэн. Python URL/browser whitelist regression 2 тест амжилттай. Бодит foreground window, UIA болон floating GUI-г Windows хэрэглэгчийн session-д туршаагүй. Windows хөвөгч товч нь page injection болон бүх видеог автоматаар илрүүлэхтэй адил биш.

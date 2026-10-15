@@ -20,7 +20,7 @@ try {
     Check-Native 'Python tests'
     & node --test tests/extension.test.mjs
     Check-Native 'JavaScript tests'
-    & $python -m PyInstaller --noconfirm --clean --onedir --windowed --name RAINY --paths $root --collect-all customtkinter --icon extension/icons/rainy.ico desktop/entry.py
+    & $python -m PyInstaller --noconfirm --clean --onedir --windowed --name RAINY --paths $root --collect-all customtkinter --collect-submodules pywinauto --collect-submodules comtypes --icon extension/icons/rainy.ico desktop/entry.py
     Check-Native 'Desktop EXE'
     & $python -m PyInstaller --noconfirm --clean --onedir --console --name RAINY.Native --paths $root --distpath native-dist --workpath native-build host/native_entry.py
     Check-Native 'Native EXE'

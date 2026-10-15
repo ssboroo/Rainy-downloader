@@ -41,6 +41,10 @@ class App(ctk.CTk):
             if controller.store.next():ensure_worker()
             return controller,snapshot,h
         self.async_call(initialize,self.initialized)
+        if os.name=='nt':
+            from desktop.floating import FloatingControl
+            self.floating=FloatingControl(self)
+            self.protocol('WM_DELETE_WINDOW',self.withdraw)
     def label(self,parent,text,size=13,color=INK,bold=False,**kw):return ctk.CTkLabel(parent,text=text,font=('Segoe UI',size,'bold' if bold else 'normal'),text_color=color,justify='left',**kw)
     def card(self,parent):return ctk.CTkFrame(parent,fg_color='white',corner_radius=18,border_width=1,border_color=BORDER)
     def heading(self,page,title,sub):
@@ -171,7 +175,7 @@ class App(ctk.CTk):
             ctk.CTkButton(card,text=text,width=105,height=29,fg_color='#EAF1FF',text_color=BLUE,hover_color='#DEE9FF',command=fn).grid(row=2,column=1,padx=(0,20))
             if j['error']:self.label(card,j['error'][:500],10,'#B76D6D',wraplength=650).grid(row=3,column=0,columnspan=2,sticky='w',padx=20,pady=(0,14))
     def build_browsers(self):
-        p=self.pages['browsers'];self.heading(p,'Браузер дээр, нэг товчоор.','Браузер бүрд холболтыг нэг удаа зөвшөөрнө. Дараа нь товч автоматаар гарна.')
+        p=self.pages['browsers'];self.heading(p,'Браузерын холболт','Өргөтгөлгүй: браузерын хажуугийн RAINY хөвөгч товчийг дарна. Доорх helper нь нэмэлт сонголт.')
         self.browser_rows=ctk.CTkFrame(p,fg_color='transparent');self.browser_rows.grid(row=2,column=0,sticky='ew');self.browser_rows.grid_columnconfigure(0,weight=1)
         ctk.CTkButton(p,text='Холболтыг бүртгэх / засах',height=43,command=lambda:self.async_call(lambda:register(ROOT),lambda r:(self.say('Native host бүртгэгдлээ. Өргөтгөлийг тусад нь зөвшөөрнө үү.'),self.refresh_browsers()))).grid(row=3,column=0,sticky='ew',pady=(18,10))
         ctk.CTkButton(p,text='Chromium өргөтгөлийн хавтас нээх',height=40,fg_color='#EAF1FF',text_color=BLUE,command=self.open_extension).grid(row=4,column=0,sticky='ew',pady=6)

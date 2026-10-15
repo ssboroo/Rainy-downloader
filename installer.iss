@@ -23,6 +23,9 @@ RestartApplications=no
 Source: "dist\RAINY\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 [Tasks]
 Name: "desktopicon"; Description: "Desktop дээр RAINY дүрс үүсгэх"; Flags: checkedonce
+Name: "autostart"; Description: "Windows нэвтрэхэд RAINY эхлүүлэх"; Flags: unchecked
+[Registry]
+Root: HKCU; Subkey: "Software\Microsoft\Windows\CurrentVersion\Run"; ValueType: string; ValueName: "RAINYDownloader"; ValueData: """{app}\RAINY.exe"""; Flags: uninsdeletevalue; Tasks: autostart
 [Icons]
 Name: "{group}\RAINY Татагч"; Filename: "{app}\RAINY.exe"
 Name: "{autodesktop}\RAINY Татагч"; Filename: "{app}\RAINY.exe"; Tasks: desktopicon
