@@ -1,0 +1,46 @@
+{
+  "manifest_version": 3,
+  "name": "RAINY · Браузерын холболт",
+  "version": "2.0.0",
+  "description": "Олон сайтын нийтэд нээлттэй видео, аудиог татах монгол интерфэйс. Windows туслах програм шаардлагатай.",
+  "permissions": [
+    "nativeMessaging",
+    "activeTab",
+    "scripting"
+  ],
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "RAINY Татагч"
+  },
+  "options_page": "options.html",
+  "icons": {
+    "16": "icons/16.png",
+    "48": "icons/48.png",
+    "128": "icons/128.png"
+  },
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'none'"
+  },
+  "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAubzkJP9Bzp7iESml4coKvSDwJp1c7lsuG9vWuq0uT5naIy3HhH21IPnemfCNra9xp0a4FCDkAD7mtp7HqAWhK6wWw0bG0TV4Cx27jD+FBoL/zAxOWukCTxh1RjFzXJd4ud1V9UvDWyhj2GJZlPkXBwRaTmd0d7fOOza2bAEAHmiSqpxwRv0Mfen5Ilfkagix/13uDUAHHyHR1iCogRBAqQPLRdeJaeApQRxTK5qA2rYubc7rHrpw1E1T1XFvChGrUlPvvKF3nDt1MRMseV8uHJ546df9dL7shmDBA6Ipg+YUqa48WC9RqF18RzmYT2JftOlHNIoCxkHoHk//3Sh5UwIDAQAB",
+  "optional_host_permissions": [
+    "http://*/*",
+    "https://*/*"
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "video-controls.js",
+        "video-source.js",
+        "shared.js"
+      ],
+      "matches": [
+        "http://*/*",
+        "https://*/*"
+      ]
+    }
+  ]
+}

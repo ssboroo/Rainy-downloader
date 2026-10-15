@@ -1,5 +1,7 @@
 # RAINY Татагч
 
-Windows desktop video downloader with optional browser integration. Windows installer builds in GitHub Actions.
+Windows desktop video downloader with Mongolian interface, optional browser controls, and installer build.
 
-See README-DESKTOP-MN.md for setup and VALIDATION-DESKTOP.md for tested scope.
+[Монгол заавар](README-DESKTOP-MN.md) · [Шалгалтын хүрээ](VALIDATION-DESKTOP.md)
+
+Download the installer from the latest successful **Build Windows installer** Actions run. Source archives are not installers.

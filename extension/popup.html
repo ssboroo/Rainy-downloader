@@ -1,0 +1,20 @@
+<!doctype html><html lang="mn"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>RAINY Татагч</title><link rel="stylesheet" href="styles.css"></head>
+<body><main class="app">
+<header><a class="brand" href="#"><span class="mark">R<span>↓</span></span><span>RAINY<span class="brand-sub">ТАТАГЧ</span></span></a><div class="header-actions"><button id="expand" class="icon-btn" title="Том цонхоор нээх" aria-label="Том цонхоор нээх">↗</button><button id="settings" class="icon-btn" title="Тохиргоо" aria-label="Тохиргоо">⚙</button></div></header>
+<div class="status-row"><span id="connection" class="connection">● Холболт шалгаж байна</span><span class="tag">WINDOWS · 1.0</span></div>
+<section class="hero"><div class="eyebrow">ХЭРЭГТЭЙ БИЧЛЭГЭЭ ХАДГАЛ</div><h1>Таалагдсан уу?<br><span>Татаад ав.</span></h1><p>Холбоосоо оруул. Чанараа сонго. Бэлэн.</p><div class="orbit" aria-hidden="true"><span>↓</span></div></section>
+<nav class="tabs" aria-label="Хэсгүүд"><button class="selected" data-tab="download">↓ Татах</button><button data-tab="queue">☷ Таталтууд <span id="queue-count">0</span></button></nav>
+<section id="download-panel">
+<div class="card composer"><div class="label-row"><label for="url">Бичлэгийн холбоос</label><button id="current" class="text-btn">Одоогийн хуудас ↙</button></div><div class="url-input"><span aria-hidden="true">↗</span><input id="url" type="url" placeholder="https://…" autocomplete="off" spellcheck="false" aria-describedby="supported"><button id="inspect" title="Холбоос шалгах" aria-label="Холбоос шалгах">→</button></div><div id="supported" class="platforms"><span>YouTube</span><span>Facebook</span><span>Instagram</span><span>X</span><span>TikTok</span><span>+ бусад</span></div>
+<div id="preview" class="preview" hidden><img id="thumbnail" alt="" referrerpolicy="no-referrer"><div><strong id="video-title"></strong><small id="video-meta"></small></div></div>
+<div id="playlist" class="playlist" hidden><strong id="playlist-title"></strong><p class="muted">Татах бичлэгүүдээ сонгоно уу (эхний 100 хүртэл).</p><div id="playlist-entries"></div></div>
+<div class="divider"></div><div class="field-grid"><div><label for="format">Формат</label><select id="format"><option value="mp4">▣ Видео · MP4</option><option value="mp3">♫ Аудио · MP3</option></select></div><div><label for="quality">Дээд чанар</label><select id="quality"><option value="360">360p</option><option value="480">480p</option><option value="720">720p · HD</option><option value="1080" selected>1080p · Full HD</option><option value="1440">1440p · 2K</option><option value="2160">2160p · 4K</option></select></div></div>
+<button id="download" class="primary"><span>↓</span> Татах</button><p id="download-hint" class="footnote">Эх сурвалжид байгаа чанараар татна.</p>
+</div>
+<details class="batch card"><summary>Олон холбоосоор татах <span>＋</span></summary><label for="batch">Нэг мөрөнд нэг холбоос · 100 хүртэл</label><textarea id="batch" rows="4" placeholder="https://…&#10;https://…"></textarea><button id="batch-add" class="secondary">Дараалалд нэмэх</button></details>
+<div class="quick-note"><span>✦</span><p><strong>Таны тохиргоогоор, автоматаар.</strong><br>Чанар, хавтсыг санаж дарааллыг үргэлжлүүлнэ.</p></div>
+</section>
+<section id="queue-panel" hidden><div class="section-heading"><h2>Таны таталтууд</h2><button id="refresh" class="text-btn">Шинэчлэх ↻</button></div><div id="jobs"></div></section>
+<div id="message" class="message" role="status" aria-live="polite" hidden></div>
+<div id="setup" class="setup card" hidden><strong>Нэг удаа холбоод, хялбар ашигла.</strong><p>Windows туслах програмыг суулгахдаа энэ ID-г ашиглана:</p><code id="extension-id"></code><button id="copy-id" class="secondary">ID хуулах</button><p>Багцын README-MN.md зааврыг дагана уу.</p></div>
+<footer>RAINY <span>•</span> Таны төхөөрөмжид хадгална.</footer></main><script type="module" src="popup.js"></script></body></html>

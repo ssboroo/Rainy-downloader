@@ -1,0 +1,41 @@
+name: Build Windows installer
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'host/**'
+      - 'desktop/**'
+      - 'extension/**'
+      - 'build-tools/**'
+      - 'installer.iss'
+      - 'requirements-desktop.txt'
+      - '.github/workflows/windows-installer.yml'
+permissions:
+  contents: read
+jobs:
+  windows:
+    runs-on: windows-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install Inno Setup
+        shell: pwsh
+        run: choco install innosetup --yes --no-progress
+      - name: Build and smoke test
+        shell: powershell
+        run: ./build-tools/build-windows.ps1
+      - uses: actions/upload-artifact@v4
+        with:
+          name: RAINY-Windows-Setup
+          path: |
+            release/RAINY-Setup.exe
+            dist/RAINY/tools/versions.json
+            dist/health-report.json
+          if-no-files-found: error
