@@ -49,6 +49,8 @@ try {
     } finally { Move-Item ($tool + '.test-missing') $tool }
     & $python build-tools/smoke_native.py dist/RAINY
     Check-Native 'Packaged Native Messaging'
+    & $python build-tools/smoke_gui.py dist/RAINY/RAINY.exe
+    Check-Native 'Packaged desktop GUI'
     $iscc = Join-Path ${env:ProgramFiles(x86)} 'Inno Setup 6\ISCC.exe'
     if (-not (Test-Path $iscc)) { throw 'Inno Setup 6 суулгана уу. winget install JRSoftware.InnoSetup' }
     & $iscc installer.iss
